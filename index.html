@@ -220,22 +220,31 @@
         });
 
         if (data.length > 0) {
-//          viewer.camera.flyTo({
-//            destination: Cesium.Cartesian3.fromDegrees(lon, lat, hae+1000),
-//            orientation: {
-//              heading: Cesium.Math.toRadians(0.0),
-//              pitch: Cesium.Math.toRadians(-30.0),
-//              roll: 0.0
-//            }
-//          });
-            viewer.camera.lookAt(
-              entity.position.getValue(Cesium.JulianDate.now()),
-              new Cesium.HeadingPitchRange(
-                Cesium.Math.toRadians(0),
-                Cesium.Math.toRadians(-30),   // 斜め下
-                300                           // 距離
-              )
-            );
+          const last = data[data.length - 1];
+          const targetLon = loctype == 0 ? last.longitude : last.metadata.orgLongitude;
+          const targetLat = loctype == 0 ? last.latitude  : last.metadata.orgLatitude;
+          const targetHae = last.hae;
+
+          const cameraOffset = Cesium.Cartesian3.fromDegrees(
+            targetLon ,       // 少し西
+            targetLat - 0.005, // 少し南
+            targetHae + 200   // 高度
+          );
+
+          // ターゲット地点をCartographicで取得
+          const targetPosition = Cesium.Cartesian3.fromDegrees(targetLon, targetLat, targetHae);
+
+          // flyTo with orientation
+          viewer.camera.flyTo({
+            destination: cameraOffset,
+            orientation: {
+              direction: Cesium.Cartesian3.normalize(
+                Cesium.Cartesian3.subtract(targetPosition, cameraOffset, new Cesium.Cartesian3()),
+                new Cesium.Cartesian3()
+              ),
+              up: Cesium.Cartesian3.UNIT_Z
+            }
+          });
         }
       } catch (e) {
         console.error("データ取得エラー:", e);
