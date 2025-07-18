@@ -209,14 +209,31 @@
             </table>
           `;
 
-          entity = viewer.entities.add({
-            position: Cesium.Cartesian3.fromDegrees(lon, lat, hae),
-            point: {
-              pixelSize: 10,
-              color: getColorByHeight(entry.hae),
-            },
-            description: descriptionTable
-          });
+          if (hae != "") {
+            entity = viewer.entities.add({
+              position: Cesium.Cartesian3.fromDegrees(lon, lat, hae),
+              point: {
+                pixelSize: 10,
+                color: getColorByHeight(entry.hae),
+              },
+              description: descriptionTable
+            });
+          } else {
+            Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [
+              Cesium.Cartographic.fromDegrees(lon, lat)
+            ]).then(function(updatedPositions) {
+              hae = updatedPositions[0].height;
+
+              entity = viewer.entities.add({
+                position: Cesium.Cartesian3.fromDegrees(lon, lat, hae),
+                point: {
+                  pixelSize: 10,
+                  color: Cesium.Color.BLACK
+                },
+                description: descriptionTable
+              });
+            });
+          }
         });
 
         if (data.length > 0) {
