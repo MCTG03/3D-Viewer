@@ -136,10 +136,10 @@
         139.777125, 35.691236
       );
 
-      // 色のグラデーション（標高に応じて）
+      // 色のグラデーション（高さに応じて）
       function getColorByHeight(height) {
-        const max = 200;
-        const min = 0;
+        const max = 180;
+        const min = 30;
         const ratio = Math.min(Math.max((height - min) / (max - min), 0), 1);
         return Cesium.Color.fromHsl(0.6 - ratio * 0.6, 1.0, 0.5);
       }
@@ -177,17 +177,16 @@
       document.getElementById("datePicker").value = date;
 
       const loctype = getQueryParam("loctype") || 0;
+      document.getElementById("loctype").value = loctype;
 
       const GAS_BASE_URL = "https://script.google.com/macros/s/AKfycbxsEOPVE9Q8kdam-QC9KWYthvSxtvdRjyGdtQPgiS4hlkxFD2pXj2dfoQyOb1USF0Gu/exec";
 
       const query = `${GAS_BASE_URL}`;
 
-      let lat=0.0;
-      let lon=0.0;
-      let hae=0.0;
-
       try {
         const data = await fetch(query).then(r => r.json())
+
+        let entity = null;
 
         data.forEach(entry => {
           if (loctype==0) {
@@ -198,27 +197,45 @@
             lon = entry.metadata.orgLongitude;
           }
           hae = entry.hae;
-          viewer.entities.add({
+
+          const descriptionTable = `
+            <table border="1" cellspacing="0" cellpadding="4">
+              ${Object.entries(entry.metadata).map(([k, v]) => `
+                <tr>
+                  <th style="text-align:left">${k}</th>
+                  <td>${v}</td>
+                </tr>
+              `).join("")}
+            </table>
+          `;
+
+          entity = viewer.entities.add({
             position: Cesium.Cartesian3.fromDegrees(lon, lat, hae),
             point: {
               pixelSize: 10,
               color: getColorByHeight(entry.hae),
             },
-            description: Object.entries(entry.metadata)
-              .map(([k, v]) => `<b>${k}</b>: ${v}`).join("<br>")
+            description: descriptionTable
           });
         });
 
         if (data.length > 0) {
-          const f = data[0];
-          viewer.camera.flyTo({
-            destination: Cesium.Cartesian3.fromDegrees(lon, lat, hae + 500),
-            orientation: {
-              heading: Cesium.Math.toRadians(0.0),     // 北を向く（0度）
-              pitch: Cesium.Math.toRadians(-45.0),     // 下向き45度（マイナスが下向き）
-              roll: 0.0                                // 水平
-            }
-          });
+//          viewer.camera.flyTo({
+//            destination: Cesium.Cartesian3.fromDegrees(lon, lat, hae+1000),
+//            orientation: {
+//              heading: Cesium.Math.toRadians(0.0),
+//              pitch: Cesium.Math.toRadians(-30.0),
+//              roll: 0.0
+//            }
+//          });
+            viewer.camera.lookAt(
+              entity.position.getValue(Cesium.JulianDate.now()),
+              new Cesium.HeadingPitchRange(
+                Cesium.Math.toRadians(0),
+                Cesium.Math.toRadians(-30),   // 斜め下
+                300                           // 距離
+              )
+            );
         }
       } catch (e) {
         console.error("データ取得エラー:", e);
