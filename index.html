@@ -182,6 +182,10 @@
 
       const query = `${GAS_BASE_URL}`;
 
+      let lat=0.0;
+      let lon=0.0;
+      let hae=0.0;
+
       try {
         const data = await fetch(query).then(r => r.json())
 
@@ -193,8 +197,9 @@
             lat = entry.metadata.orgLatitude;
             lon = entry.metadata.orgLongitude;
           }
+          hae = entry.hae;
           viewer.entities.add({
-            position: Cesium.Cartesian3.fromDegrees(lon, lat, entry.hae),
+            position: Cesium.Cartesian3.fromDegrees(lon, lat, hae),
             point: {
               pixelSize: 10,
               color: getColorByHeight(entry.hae),
@@ -207,7 +212,12 @@
         if (data.length > 0) {
           const f = data[0];
           viewer.camera.flyTo({
-            destination: Cesium.Cartesian3.fromDegrees(f.longitude, f.latitude, f.hae + 500)
+            destination: Cesium.Cartesian3.fromDegrees(lon, lat, hae + 500),
+            orientation: {
+              heading: Cesium.Math.toRadians(0.0),     // 北を向く（0度）
+              pitch: Cesium.Math.toRadians(-45.0),     // 下向き45度（マイナスが下向き）
+              roll: 0.0                                // 水平
+            }
           });
         }
       } catch (e) {
