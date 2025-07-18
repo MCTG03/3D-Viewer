@@ -58,8 +58,6 @@
 
   <script>
 
-    const GAS_BASE_URL = "https://script.google.com/macros/s/AKfycbxsEOPVE9Q8kdam-QC9KWYthvSxtvdRjyGdtQPgiS4hlkxFD2pXj2dfoQyOb1USF0Gu/exec";
-
     function getQueryParam(name) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(name);
@@ -69,9 +67,9 @@
       const date = document.getElementById("datePicker").value;
       const loctype = document.getElementById("loctype").value;
       if (date) {
-        window.location.href = `${GAS_BASE_URL}?date=${date}&loctype=${loctype}`;
+        window.location.href = `?date=${date}&loctype=${loctype}`;
       } else {
-        window.location.href = `${GAS_BASE_URL}?loctype=${loctype}`;
+        window.location.href = `?loctype=${loctype}`;
       }
     }
 
@@ -180,7 +178,9 @@
 
       const loctype = getQueryParam("loctype") || 0;
 
-      const query = `${GAS_BASE_URL}?json=1&date=${date}&loctype=${loctype}`;
+      const GAS_BASE_URL = "https://script.google.com/macros/s/AKfycbxsEOPVE9Q8kdam-QC9KWYthvSxtvdRjyGdtQPgiS4hlkxFD2pXj2dfoQyOb1USF0Gu/exec";
+
+      const query = `${GAS_BASE_URL}`;
 
       try {
         const data = await fetch(query).then(r => r.json())
