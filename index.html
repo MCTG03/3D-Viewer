@@ -257,10 +257,11 @@
 //              up: Cesium.Cartesian3.UNIT_Z
 //            }
 //          });
+
             viewer.flyTo(viewer.entities, {
               duration: 2.0, // 飛行時間（秒）
               maximumHeight: 10000, // オプション: 上限高度
-              offset: new Cesium.HeadingPitchRange(0, -0.5, 0) // オプション: 視線の角度調整
+              offset: new Cesium.HeadingPitchRange(0, -0.7, 0), // オプション: 視線の角度調整
             });
         }
       } catch (e) {
